@@ -18,19 +18,24 @@ class App extends React.Component {
 
     componentDidMount() {
         const hourInMilliseconds = 1000 * 60 * 60;
-        const { schedules } = this.state;
-        if (schedules.length !== 0) {
-            this.setState({
-                schedules: JSON.parse(localStorage.getItem('schedule'))
-            });
-        }
+        // const { schedules } = this.state;
+        const currentSchedules = JSON.parse(localStorage.getItem('schedule'));
+        // if (schedules.length !== 0) {
+        this.setState({
+            schedules: currentSchedules === null ? [] : currentSchedules
+        });
+        // console.log('kesini');
+        console.log(currentSchedules);
+        // }
         setInterval(() => {
-            for (let index = 0; index < schedules.length; index++ ) {
-                if (new Date().toLocaleDateString() === schedules[index].startDate.toLocaleDateString()) {
-                    this.sendEmail(schedules[index].description);
+            for (let index = 0; index < currentSchedules.length; index++ ) {
+                if (new Date().toLocaleDateString() === new Date(currentSchedules[index].startDate).toLocaleDateString()) {
+                    this.sendEmail(currentSchedules[index]);
                     console.log('Success to sending email');
                 }
-                console.log('No schedule to send');
+                else {
+                    console.log('No schedule to send');
+                }
             }
         },hourInMilliseconds);
     }
@@ -41,7 +46,9 @@ class App extends React.Component {
       });
   };
 
-  sendEmail = (description) => {
+  sendEmail = (schedule) => {
+      const { schedules } = this.state;
+      const { description } = schedule;
       emailjs.send('huda_email_dev','template_schedule_email',{
           description,
       }, 'user_RzadSic2nXGpRFB8kmN6e')
@@ -50,6 +57,11 @@ class App extends React.Component {
           }, (error) => {
               console.log(error.text);
           });
+      schedules.filter((el) => el.description !== description );
+      localStorage.setItem('schedule', JSON.stringify(schedules));
+      this.setState({
+          schedules: JSON.parse(localStorage.getItem('schedule'))
+      });
   };
 
   handleSubmit = () => {
@@ -62,7 +74,7 @@ class App extends React.Component {
       };
       schedules.push(schedule);
       localStorage.setItem('schedule', JSON.stringify(schedules));
-      console.log(JSON.parse(localStorage.getItem('schedule')));
+      // console.log(JSON.parse(localStorage.getItem('schedule')));
       this.setState({
           ...schedules,
           description: '',
