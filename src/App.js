@@ -17,7 +17,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        // const dayInMilliseconds = 1000 * 60 * 60 * 24;
+        const hourInMilliseconds = 1000 * 60 * 60;
         const { schedules } = this.state;
         if (schedules.length !== 0) {
             this.setState({
@@ -28,9 +28,11 @@ class App extends React.Component {
             for (let index = 0; index < schedules.length; index++ ) {
                 if (new Date().toLocaleDateString() === schedules[index].startDate.toLocaleDateString()) {
                     this.sendEmail(schedules[index].description);
+                    console.log('Success to sending email');
                 }
+                console.log('No schedule to send');
             }
-        },20000);
+        },hourInMilliseconds);
     }
 
   handleChange = (type, newValue) => {
