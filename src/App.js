@@ -30,7 +30,7 @@ class App extends React.Component {
         setInterval(() => {
             for (let index = 0; index < currentSchedules.length; index++ ) {
                 if (new Date().toLocaleDateString() === new Date(currentSchedules[index].startDate).toLocaleDateString()) {
-                    this.sendEmail(currentSchedules[index]);
+                    this.sendEmail(currentSchedules[index], currentSchedules);
                     console.log('Success to sending email');
                 }
                 else {
@@ -46,7 +46,7 @@ class App extends React.Component {
       });
   };
 
-  sendEmail = (schedule) => {
+  sendEmail = (schedule, currentSchedule) => {
       const { schedules } = this.state;
       const { description } = schedule;
       emailjs.send('huda_email_dev','template_schedule_email',{
@@ -57,7 +57,8 @@ class App extends React.Component {
           }, (error) => {
               console.log(error.text);
           });
-      schedules.filter((el) => el.description !== description );
+      currentSchedule.splice(schedule, 1);
+      console.log(currentSchedule);
       localStorage.setItem('schedule', JSON.stringify(schedules));
       this.setState({
           schedules: JSON.parse(localStorage.getItem('schedule'))
