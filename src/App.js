@@ -10,7 +10,6 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            id: 0,
             startDate: new Date(),
             description: '',
             schedules: [],
@@ -18,15 +17,20 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        const dayInMilliseconds = 1000 * 60 * 60 * 24;
+        // const dayInMilliseconds = 1000 * 60 * 60 * 24;
         const { schedules } = this.state;
+        if (schedules.length !== 0) {
+            this.setState({
+                schedules: JSON.parse(localStorage.getItem('schedule'))
+            });
+        }
         setInterval(() => {
             for (let index = 0; index < schedules.length; index++ ) {
                 if (new Date().toLocaleDateString() === schedules[index].startDate.toLocaleDateString()) {
                     this.sendEmail(schedules[index].description);
                 }
             }
-        },dayInMilliseconds);
+        },20000);
     }
 
   handleChange = (type, newValue) => {
@@ -47,15 +51,16 @@ class App extends React.Component {
   };
 
   handleSubmit = () => {
-      let { id } = this.state;
       const { schedules, description, startDate } = this.state;
-      id = id + 1;
+
       const schedule = {
-          id,
+          id: schedules.length !== 0 ?JSON.parse(localStorage.getItem('schedule')).length : 0,
           description,
           startDate,
       };
       schedules.push(schedule);
+      localStorage.setItem('schedule', JSON.stringify(schedules));
+      console.log(JSON.parse(localStorage.getItem('schedule')));
       this.setState({
           ...schedules,
           description: '',
@@ -125,7 +130,7 @@ class App extends React.Component {
                                       <tr>
                                           <td>{item.id}</td>
                                           <td>{item.description}</td>
-                                          <td>{item.startDate.getDate() + '-' + item.startDate.getMonth() + '-' + item.startDate.getFullYear()}</td>
+                                          <td>{new Date(item.startDate).getDate() + '-' + new Date(item.startDate).getMonth() + 1 + '-' + new Date(item.startDate).getFullYear()}</td>
                                       </tr>
                                   </tbody>
                               ))}
