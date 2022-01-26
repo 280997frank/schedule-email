@@ -18,24 +18,26 @@ class App extends React.Component {
 
     componentDidMount() {
         const hourInMilliseconds = 1000 * 60 * 60;
-        // const { schedules } = this.state;
         const currentSchedules = JSON.parse(localStorage.getItem('schedule'));
-        // if (schedules.length !== 0) {
         this.setState({
             schedules: currentSchedules === null ? [] : currentSchedules
         });
-        // console.log('kesini');
-        console.log(currentSchedules);
-        // }
         setInterval(() => {
-            for (let index = 0; index < currentSchedules.length; index++ ) {
-                if (new Date().toLocaleDateString() === new Date(currentSchedules[index].startDate).toLocaleDateString()) {
-                    this.sendEmail(currentSchedules[index], currentSchedules);
-                    console.log('Success to sending email');
+            if (new Date().getHours().toString() === '17') {
+                const updatedSchedule = JSON.parse(localStorage.getItem('schedule'));
+                console.log(updatedSchedule.length);
+                for (let index = 0; index < updatedSchedule.length; index++) {
+                    if (new Date().toLocaleDateString() === new Date(updatedSchedule[index].startDate).toLocaleDateString()) {
+                        console.log(new Date(updatedSchedule[index].startDate));
+                        this.sendEmail(updatedSchedule[index], updatedSchedule);
+                        console.log('Success to sending email');
+                    } else {
+                        console.log('No schedule to send');
+                    }
                 }
-                else {
-                    console.log('No schedule to send');
-                }
+                this.setState({
+                    schedules: JSON.parse(localStorage.getItem('schedule'))
+                });
             }
         },hourInMilliseconds);
     }
@@ -47,7 +49,6 @@ class App extends React.Component {
   };
 
   sendEmail = (schedule, currentSchedule) => {
-      const { schedules } = this.state;
       const { description } = schedule;
       emailjs.send('huda_email_dev','template_schedule_email',{
           description,
@@ -57,27 +58,24 @@ class App extends React.Component {
           }, (error) => {
               console.log(error.text);
           });
-      currentSchedule.splice(schedule, 1);
-      console.log(currentSchedule);
-      localStorage.setItem('schedule', JSON.stringify(schedules));
-      this.setState({
-          schedules: JSON.parse(localStorage.getItem('schedule'))
-      });
+      const updatedSchedule = currentSchedule.filter((el) => el.description !== schedule.description);
+      console.log(updatedSchedule);
+      localStorage.setItem('schedule', JSON.stringify(updatedSchedule));
   };
 
   handleSubmit = () => {
       const { schedules, description, startDate } = this.state;
 
       const schedule = {
-          id: schedules.length !== 0 ?JSON.parse(localStorage.getItem('schedule')).length : 0,
+          id: description,
           description,
           startDate,
       };
       schedules.push(schedule);
       localStorage.setItem('schedule', JSON.stringify(schedules));
-      // console.log(JSON.parse(localStorage.getItem('schedule')));
+      const currentSchedule = JSON.parse(localStorage.getItem('schedule'));
       this.setState({
-          ...schedules,
+          schedules: currentSchedule,
           description: '',
           startDate: new Date()
       });
